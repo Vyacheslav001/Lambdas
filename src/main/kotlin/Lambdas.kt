@@ -18,8 +18,8 @@ fun main() {
     convert(20.0) { c: Double -> c * 1.8 + 32 }
     convertFive { it * 1.8 + 32 }
 
-    val pounds = getConversionLambda("KgsToPounds")(2.5)
-    println(pounds)
+    //Преобразовать 2.5 кг в фунты
+    println("Convert 2.5kg to Pounds: ${getConversionLambda ("KgsToPounds")(2.5)}")
 
     convert(20.0, getConversionLambda("CentigradeToFahrenheit"))
 
@@ -27,9 +27,23 @@ fun main() {
     val poundsToUSTons = { x: Double -> x / 2000.0 }
     val kgsToUSTons = combine(kgsToPounds, poundsToUSTons)
     val usTons = kgsToUSTons(1000.0)
+
+    //Определить два лямбда-выражения для преобразований
+    val kgsToPoundsLambda = getConversionLambda("KgsToPounds")
+    val poundsToUSTonsLambda = getConversionLambda("PoundsToUSTons")
+
+    //Два лямбда-выражения преобразуются в одно новое
+    val kgsToUSTonsLambda = combine(kgsToPoundsLambda, poundsToUSTonsLambda)
+
+//Использовать новое лямбда-выражение для преобразования
+// 17,4 кг в американские тонны
+// val value = 17.4    
+// println("$value kgs is ${convert(value, kgsToUSTonsLambda)} US tons") }
 }
 
-fun convert(x: Double, converter: (Double) -> Double): Double {
+typealias DoubleConversion = (Double) -> Double
+
+fun convert(x: Double, converter: DoubleConversion): Double {
     val result = converter(x)
     println("$x is converted to $result")
     return result
@@ -41,7 +55,7 @@ fun convertFive(converter: (Int) -> Double): Double {
     return result
 }
 
-fun getConversionLambda(str: String): (Double) -> Double {
+fun getConversionLambda(str: String): DoubleConversion {
     return when (str) {
         "CentigradeToFahrenheit" -> {
             { it * 1.8 + 32 }
@@ -58,6 +72,6 @@ fun getConversionLambda(str: String): (Double) -> Double {
     }
 }
 
-fun combine(lambda1: (Double) -> Double, lambda2: (Double) -> Double): (Double) -> Double {
+fun combine(lambda1: DoubleConversion, lambda2: DoubleConversion): DoubleConversion {
     return { x: Double -> lambda2(lambda1(x)) }
 }
